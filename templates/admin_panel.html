@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin panel</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Arial;background:#f6f7fb}
+    header{background:linear-gradient(135deg,#2e7d32,#1b5e20);color:#fff;padding:16px}
+    .wrap{max-width:1100px;margin:18px auto;padding:0 14px;display:grid;gap:14px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,.06)}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left;font-size:14px;vertical-align:top}
+    th{color:#6b7280;font-size:12px}
+    .btn{padding:8px 10px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:800}
+    .btn.danger{background:#b00020;color:#fff;border:0}
+    .btn.primary{background:#2e7d32;color:#fff;border:0}
+    input,select,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid #e5e7eb}
+    textarea{min-height:70px;resize:vertical}
+    .grid{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    .muted{color:#6b7280;font-size:13px}
+    .msg{color:#b00020;font-size:13px;margin-top:8px;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+<header>
+  <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <b>Admin panel</b>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="location.href='/profile/'">Profil</button>
+      <button class="btn" onclick="location.href='/dashboard/'">Dashboard</button>
+      <button class="btn" onclick="location.href='/map/'">Mapa</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h3 style="margin:0 0 6px 0">Pridať POI</h3>
+    <div class="muted">Admin vie pridávať a mazať miesta (POI).</div>
+
+    <div class="grid" style="margin-top:10px">
+      <div>
+        <label>Názov</label>
+        <input id="p_name" placeholder="Názov POI">
+      </div>
+      <div>
+        <label>Kategória</label>
+        <input id="p_cat" placeholder="priroda / historia / turistika">
+      </div>
+      <div>
+        <label>Lat</label>
+        <input id="p_lat" placeholder="49.4106">
+      </div>
+      <div>
+        <label>Lng</label>
+        <input id="p_lng" placeholder="18.4972">
+      </div>
+      <div style="grid-column:1/-1">
+        <label>Popis</label>
+        <textarea id="p_desc" placeholder="Krátky popis…"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn primary" onclick="createPOI()">+ Pridať POI</button>
+      <span class="msg" id="msg"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 6px 0">POI – zoznam</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Názov</th><th>Kategória</th><th>Lat/Lng</th><th>Akcia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pois %}
+        <tr>
+          <td><b>{{ p.name }}</b><br><span class="muted">{{ p.description }}</span></td>
+          <td>{{ p.category }}</td>
+          <td class="muted">{{ p.lat }}, {{ p.lng }}</td>
+          <td>
+            <button class="btn danger" onclick="deletePOI({{ p.id }})">Zmazať</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 6px 0">Používatelia</h3>
+    <div class="muted">Admin môže mazať používateľov (okrem seba).</div>
+    <table style="margin-top:10px">
+      <thead>
+        <tr>
+          <th>Username</th><th>Email</th><th>Staff</th><th>Akcia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><b>{{ u.username }}</b></td>
+          <td class="muted">{{ u.email }}</td>
+          <td class="muted">{% if u.is_staff %}áno{% else %}nie{% endif %}</td>
+          <td>
+            <button class="btn danger" onclick="deleteUser({{ u.id }})">Zmazať</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<input type="hidden" id="csrf" value="{{ csrf_token }}">
+
+<script>
+  function csrf(){ return document.getElementById("csrf").value; }
+  const msg = document.getElementById("msg");
+
+  async function api(url, opts){
+    const r = await fetch(url, opts);
+    const data = await r.json().catch(()=> ({}));
+    if (!r.ok) throw new Error(data.error || data.detail || JSON.stringify(data));
+    return data;
+  }
+
+  async function createPOI(){
+    msg.textContent = "";
+    try{
+      await api("/api/admin/poi/create/", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-CSRFToken": csrf()
+        },
+        body: JSON.stringify({
+          name: document.getElementById("p_name").value,
+          category: document.getElementById("p_cat").value,
+          description: document.getElementById("p_desc").value,
+          lat: document.getElementById("p_lat").value,
+          lng: document.getElementById("p_lng").value,
+        })
+      });
+      location.reload();
+    }catch(e){
+      msg.textContent = "Chyba: " + e.message;
+    }
+  }
+
+  async function deletePOI(id){
+    if (!confirm("Zmazať POI?")) return;
+    try{
+      await api(`/api/admin/poi/${id}/delete/`, {
+        method:"DELETE",
+        headers:{ "X-CSRFToken": csrf() }
+      });
+      location.reload();
+    }catch(e){
+      alert(e.message);
+    }
+  }
+
+  async function deleteUser(id){
+    if (!confirm("Zmazať používateľa?")) return;
+    try{
+      await api(`/api/admin/user/${id}/delete/`, {
+        method:"DELETE",
+        headers:{ "X-CSRFToken": csrf() }
+      });
+      location.reload();
+    }catch(e){
+      alert(e.message);
+    }
+  }
+</script>
+
+</body>
+</html>

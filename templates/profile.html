@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profil</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Arial;background:#f6f7fb}
+    header{background:linear-gradient(135deg,#2e7d32,#1b5e20);color:#fff;padding:16px}
+    .wrap{max-width:900px;margin:18px auto;padding:0 14px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,.06)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:800}
+    .btn.primary{background:#2e7d32;color:#fff;border:0}
+    .muted{color:#6b7280;font-size:13px}
+    .tag{display:inline-block;background:#eef6ee;border:1px solid #d3ead4;border-radius:999px;padding:4px 10px;font-size:12px}
+  </style>
+</head>
+<body>
+<header>
+  <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <b>Profil</b>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="location.href='/dashboard/'">Dashboard</button>
+      <button class="btn" onclick="location.href='/map/'">Mapa</button>
+      {% if is_admin %}
+        <button class="btn primary" onclick="location.href='/admin-panel/'">Admin panel</button>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <h2 style="margin:0 0 6px 0">{{ u.username }}</h2>
+        <div class="muted">{{ u.email }}</div>
+        {% if is_admin %}<div style="margin-top:8px"><span class="tag">ADMIN</span></div>{% endif %}
+      </div>
+      <div class="muted" style="text-align:right">
+        <div>Výlety: <b>{{ total_trips }}</b></div>
+        <div>Návštevy POI: <b>{{ total_visits }}</b></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn" onclick="location.href='/'">Odhlásiť</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

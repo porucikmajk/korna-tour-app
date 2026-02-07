@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Korňa – Dashboard</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --green:#2e7d32;
+      --border:#e5e7eb;
+      --shadow: 0 10px 25px rgba(0,0,0,.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      background:linear-gradient(135deg, var(--green), #1b5e20);
+      color:#fff;
+      padding:18px 14px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+    }
+    .topbar{
+      max-width:1000px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+    .brand b{font-size:18px}
+    .brand span{font-size:12px;opacity:.9}
+    .btn{
+      border:0;
+      background:#fff;
+      color:#0f172a;
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 6px 14px rgba(0,0,0,.12);
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow:none;
+      backdrop-filter: blur(8px);
+    }
+
+    .wrap{max-width:1000px;margin:18px auto;padding:0 14px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media(min-width:900px){
+      .grid{grid-template-columns: 1.1fr .9fr;}
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+    }
+    .muted{color:var(--muted);font-size:13px}
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .stat{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background:linear-gradient(180deg, #ffffff, #fbfbfd);
+    }
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .value{font-size:20px;font-weight:800;margin-top:2px}
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .actions .btn{
+      box-shadow:none;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .actions .btn.primary{
+      background:var(--green);
+      color:#fff;
+      border:0;
+    }
+
+    .list{
+      margin:10px 0 0 0;
+      padding:0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:520px;
+      overflow:auto;
+    }
+    .item{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      background:#fff;
+    }
+    .item b{display:block;font-size:14px}
+    .tag{
+      font-size:12px;
+      color:#0f172a;
+      background:#eef6ee;
+      border:1px solid #d3ead4;
+      padding:4px 10px;
+      border-radius:999px;
+      align-self:flex-start;
+      white-space:nowrap;
+    }
+    .tag.visited{
+      background:#eaf7ee;
+      border-color:#c8f3d2;
+      color:#1b5e20;
+      font-weight:800;
+    }
+    .empty{
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:14px;
+      color:var(--muted);
+      background:#fff;
+    }
+    .err{
+      color:#b00020;
+      font-size:13px;
+      margin-top:10px;
+      white-space:pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <b>Korňa – Dashboard</b>
+      <span>Turistický sprievodca + výlety</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn secondary" onclick="location.href='/profile/'">👤 Profil</button>
+      <button class="btn secondary" onclick="location.href='/map/'">🗺️ Mapa</button>
+      <button class="btn secondary" onclick="location.href='/'">Odhlásiť</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <div class="card">
+      <h3>Moje štatistiky</h3>
+      <div class="muted">Súhrn za všetky ukončené výlety (a návštevy).</div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Spolu vzdialenosť</div>
+          <div class="value" id="totalKm">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Spolu kroky (odhad)</div>
+          <div class="value" id="totalSteps">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Počet návštev POI</div>
+          <div class="value" id="totalVisits">—</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="location.href='/map/'">Začať / pokračovať vo výlete</button>
+        <button class="btn" onclick="loadStats()">Obnoviť</button>
+      </div>
+
+      <div class="err" id="err"></div>
+    </div>
+
+    <div class="card">
+      <h3>Posledné navštívené miesta</h3>
+      <div class="muted">Záznamy sa pridajú automaticky, keď si do ~30m od POI.</div>
+
+      <ul class="list" id="visitList"></ul>
+      <div class="empty" id="empty" style="display:none;">Zatiaľ nemáš žiadne navštívené miesta.</div>
+    </div>
+
+    <div class="card">
+      <h3>Miesta (POI)</h3>
+      <div class="muted">Vyber si miesto a spusti navigáciu na mape. Navštívené sa označia ✓.</div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+        <select id="poiFilter"
+          style="padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff">
+          <option value="">Všetky kategórie</option>
+          <option value="priroda">Príroda</option>
+          <option value="historia">História</option>
+          <option value="turistika">Turistika</option>
+        </select>
+
+        <input
+          id="poiSearch"
+          placeholder="Hľadať POI…"
+          style="flex:1;min-width:200px;padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff">
+
+        <button class="btn" onclick="loadPOI()">Obnoviť</button>
+      </div>
+
+      <div
+        id="poiGrid"
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:12px">
+      </div>
+
+      <div class="empty" id="poiEmpty" style="display:none;">
+        Zatiaľ nie sú dostupné žiadne POI.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ===== STATE =====
+  let allPOI = [];
+  let visitedIds = new Set(); // poi_id ktoré už používateľ navštívil
+
+  // ===== HELPERS =====
+  function fmtKm(m){ return (m/1000).toFixed(2) + " km"; }
+  function safeDate(s){ try { return new Date(s).toLocaleString(); } catch { return s; } }
+
+  function escapeHtml(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  async function tryFetch(url){
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`${url} → HTTP ${r.status}`);
+    return r.json();
+  }
+
+  // ===== STATS + VISITS =====
+  async function loadStats(){
+    const err = document.getElementById("err");
+    err.textContent = "";
+
+    try{
+      const data = await tryFetch("/api/stats");
+
+      const visits = data.visits || [];
+      const total_m = data.total_m ?? 0;
+      const total_steps = data.total_steps ?? 0;
+
+      document.getElementById("totalKm").textContent = fmtKm(total_m);
+      document.getElementById("totalSteps").textContent = total_steps.toString();
+
+      // --- visitedIds: prefer visited_poi_ids, fallback: z visits (poi_id)
+      if (Array.isArray(data.visited_poi_ids)) {
+        visitedIds = new Set(data.visited_poi_ids.map(Number));
+      } else {
+        visitedIds = new Set(
+          visits.map(v => v.poi_id).filter(x => x !== undefined && x !== null).map(Number)
+        );
+      }
+
+      document.getElementById("totalVisits").textContent = visitedIds.size.toString();
+
+      const list = document.getElementById("visitList");
+      const empty = document.getElementById("empty");
+      list.innerHTML = "";
+
+      if (!visits.length){
+        empty.style.display = "block";
+      } else {
+        empty.style.display = "none";
+        visits.slice(0, 100).forEach(v => {
+          const name = v.poi_name || v.name || "POI";
+          const cat  = v.poi_category || v.category || "";
+          const when = v.visited_at || v.date || v.time || "";
+
+          const li = document.createElement("li");
+          li.className = "item";
+          li.innerHTML = `
+            <div>
+              <b>${escapeHtml(name)}</b>
+              <div class="muted">${escapeHtml(safeDate(when))}</div>
+            </div>
+            ${cat ? `<span class="tag">${escapeHtml(cat)}</span>` : ""}
+          `;
+          list.appendChild(li);
+        });
+      }
+
+      // po načítaní stats prekresli POI (aby sa ukázalo ✓)
+      renderPOI();
+
+    } catch(e){
+      err.textContent = "Nepodarilo sa načítať štatistiky.\n" + e.message;
+      document.getElementById("totalKm").textContent = "—";
+      document.getElementById("totalSteps").textContent = "—";
+      document.getElementById("totalVisits").textContent = "—";
+    }
+  }
+
+  // ===== POI LIST =====
+  function renderPOI(){
+    const grid = document.getElementById("poiGrid");
+    const empty = document.getElementById("poiEmpty");
+    if (!grid) return;
+
+    const q = (document.getElementById("poiSearch").value || "").toLowerCase().trim();
+    const cat = document.getElementById("poiFilter").value;
+
+    let items = allPOI.slice();
+    if (cat) items = items.filter(p => p.category === cat);
+    if (q) items = items.filter(p =>
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.description || "").toLowerCase().includes(q)
+    );
+
+    grid.innerHTML = "";
+
+    if (!items.length) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    items.forEach(p => {
+      const isVisited = visitedIds.has(Number(p.id));
+
+      const card = document.createElement("div");
+      card.className = "stat";
+      card.style.padding = "12px";
+      card.style.borderRadius = "16px";
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start">
+          <div style="min-width:0">
+            <div style="font-weight:900; font-size:14px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; ${isVisited ? "color:#1b5e20" : ""}">
+              ${escapeHtml(p.name)}
+            </div>
+            <div class="muted" style="font-size:12px; line-height:1.4; height:34px; overflow:hidden;">
+              ${escapeHtml(p.description)}
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+            ${isVisited ? `<span class="tag visited">✓ Navštívené</span>` : ""}
+            <span class="tag">${escapeHtml(p.category)}</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap">
+          <button class="btn" style="flex:1; min-width:140px; background:var(--green); color:#fff; border:0; box-shadow:none"
+            onclick="goToPOI(${p.id})">🧭 Navigovať</button>
+
+          <button class="btn" style="flex:1; min-width:140px; box-shadow:none; border:1px solid var(--border); background:#fff"
+            onclick="openOnMap(${p.lat}, ${p.lng})">📍 Zobraziť</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadPOI(){
+    try{
+      const r = await fetch("/api/pois/");
+      if (!r.ok) throw new Error("POI HTTP " + r.status);
+      const data = await r.json();
+      allPOI = data.pois || [];
+      renderPOI();
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  function goToPOI(id){
+    location.href = "/map/?to=" + encodeURIComponent(id);
+  }
+
+  function openOnMap(lat, lng){
+    location.href = "/map/?lat=" + encodeURIComponent(lat) + "&lng=" + encodeURIComponent(lng);
+  }
+
+  // filtre a search
+  document.addEventListener("input", (e) => {
+    if (e.target && (e.target.id === "poiSearch" || e.target.id === "poiFilter")) {
+      renderPOI();
+    }
+  });
+
+  // init
+  loadStats();
+  loadPOI();
+</script>
+
+</body>
+</html>

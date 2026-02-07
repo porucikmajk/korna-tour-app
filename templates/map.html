@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Korňa – Mapa</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --green:#2e7d32;
+      --green2:#1b5e20;
+      --border:#e5e7eb;
+      --shadow: 0 10px 25px rgba(0,0,0,.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      background:linear-gradient(135deg, var(--green), var(--green2));
+      color:#fff;
+      padding:16px 14px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+    }
+    .topbar{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{display:flex;flex-direction:column;line-height:1.1}
+    .brand b{font-size:18px}
+    .brand span{font-size:12px;opacity:.9}
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      transition: transform .05s ease;
+      user-select:none;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.secondary{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      backdrop-filter: blur(8px);
+    }
+    .btn.primary{background:var(--green);color:#fff}
+    .btn.danger{background:#b00020;color:#fff}
+    .btn.light{
+      background:#fff;
+      border:1px solid var(--border);
+      color:#0f172a;
+    }
+
+    .layout{
+      position:relative;
+      height: calc(100vh - 72px);
+      max-height: calc(100vh - 72px);
+    }
+    #map{height:100%;width:100%}
+
+    .panel{
+      position:absolute;
+      top:14px;
+      left:14px;
+      width:min(380px, calc(100vw - 28px));
+      z-index:1200;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel .head{
+      padding:12px 12px 10px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel .head .title{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .panel .head .title b{font-size:14px}
+    .panel .head .title span{font-size:12px;color:var(--muted)}
+    .panel .content{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .pillrow{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:linear-gradient(180deg,#fff,#fbfbfd);
+      font-size:12px;
+      color:#0f172a;
+    }
+    .pill.muted{color:var(--muted)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .msg{font-size:12px;color:#b00020;white-space:pre-wrap}
+
+    .leaflet-routing-container{
+      border-radius:14px !important;
+      box-shadow: var(--shadow) !important;
+      border:1px solid var(--border) !important;
+      overflow:hidden;
+    }
+
+    /* visited POI icon */
+    .poi-dot{
+      width:14px;height:14px;border-radius:999px;
+      border:2px solid #1b5e20;
+      background:#2e7d32;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <b>Korňa – Mapa & Výlet</b>
+      <span>POI • navigácia • trackovanie trasy</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn secondary" onclick="location.href='/dashboard/'">⬅ Dashboard</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <div id="map"></div>
+
+  <div class="panel">
+    <div class="head">
+      <div class="title">
+        <b>Aktuálny výlet</b>
+        <span id="gpsStatus">GPS: čakám na povolenie…</span>
+      </div>
+      <button class="btn light" id="btnClearRoute" title="Zmazať trasu">🧹</button>
+    </div>
+
+    <div class="content">
+      <div class="pillrow">
+        <span class="pill" id="live">Vzdialenosť: 0.00 km | Kroky: 0</span>
+        <span class="pill muted" id="hint">Tip: klikni na POI → „Navigovať“</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnStart">▶️ Štart</button>
+        <button class="btn danger" id="btnStop" disabled>⏹ Stop</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+</div>
+
+<input type="hidden" id="csrf" value="{{ csrf_token }}">
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<script>
+  const map = L.map("map", { zoomControl: true }).setView([49.4106, 18.4972], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+
+  const poiById = new Map();
+
+  const btnStart = document.getElementById("btnStart");
+  const btnStop = document.getElementById("btnStop");
+  const btnClearRoute = document.getElementById("btnClearRoute");
+  const live = document.getElementById("live");
+  const msg = document.getElementById("msg");
+  const gpsStatus = document.getElementById("gpsStatus");
+
+  let tripId = null;
+  let watchId = null;
+  let lastSentAt = 0;
+
+  let routingControl = null;
+  let currentPos = null;
+  let pendingRoute = null;
+
+  // visited
+  let visitedIds = new Set();
+
+  function csrfToken() { return document.getElementById("csrf").value; }
+  function setLive(distance_m, steps_est){
+    live.textContent = `Vzdialenosť: ${(distance_m/1000).toFixed(2)} km | Kroky: ${steps_est}`;
+  }
+
+  async function fetchJson(url, opts = {}) {
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || data?.detail || JSON.stringify(data) || `HTTP ${res.status}`);
+    return data;
+  }
+
+  function showRouteTo(lat, lng) {
+    if (!currentPos) {
+      msg.textContent = "Najprv povoľ polohu (GPS) – potom sa dá navigovať.";
+      return;
+    }
+
+    if (routingControl) {
+      map.removeControl(routingControl);
+      routingControl = null;
+    }
+
+    routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(currentPos.lat, currentPos.lng),
+        L.latLng(lat, lng)
+      ],
+      routeWhileDragging: false,
+      showAlternatives: false,
+      addWaypoints: false,
+      fitSelectedRoutes: true,
+      show: true,
+      collapsible: true,
+      router: L.Routing.osrmv1({ serviceUrl: "https://router.project-osrm.org/route/v1" })
+    }).addTo(map);
+
+    msg.textContent = "";
+  }
+
+  window.__navTo = (lat, lng) => showRouteTo(lat, lng);
+
+  btnClearRoute.onclick = () => {
+    if (routingControl) {
+      map.removeControl(routingControl);
+      routingControl = null;
+      msg.textContent = "Trasa zmazaná.";
+    }
+  };
+
+  function readRouteFromUrl() {
+    const params = new URLSearchParams(location.search);
+
+    const toIdRaw = params.get("to");
+    if (toIdRaw) {
+      const toId = Number(toIdRaw);
+      if (Number.isFinite(toId) && poiById.has(toId)) {
+        const p = poiById.get(toId);
+        pendingRoute = { lat: p.lat, lng: p.lng, name: p.name };
+        msg.textContent = `Vybrané POI: ${p.name}. Zapni GPS a ukáže sa trasa.`;
+        return;
+      } else {
+        msg.textContent = "POI (to=...) sa nenašlo. Skontroluj ID.";
+        return;
+      }
+    }
+
+    const lat = params.get("lat");
+    const lng = params.get("lng");
+    if (lat && lng) {
+      const la = Number(lat);
+      const ln = Number(lng);
+      if (Number.isFinite(la) && Number.isFinite(ln)) {
+        pendingRoute = { lat: la, lng: ln, name: "Vybrané miesto" };
+        msg.textContent = "Vybrané miesto z URL. Zapni GPS a ukáže sa trasa.";
+      }
+    }
+  }
+
+  // ===== load visited ids =====
+  async function loadVisited() {
+    try {
+      let data;
+      try {
+        data = await fetchJson("/api/me/stats");
+      } catch {
+        data = await fetchJson("/api/stats/");
+      }
+
+      if (Array.isArray(data.visited_poi_ids)) {
+        visitedIds = new Set(data.visited_poi_ids.map(Number));
+      } else {
+        const visits = data.visits || [];
+        visitedIds = new Set(
+          visits.map(v => v.poi_id).filter(x => x !== undefined && x !== null).map(Number)
+        );
+      }
+    } catch (e) {
+      // keď nie je stats endpoint, len nič
+      visitedIds = new Set();
+    }
+  }
+
+  // visited icon
+  const visitedIcon = L.divIcon({
+    className: "",
+    html: `<div class="poi-dot"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+  });
+
+  async function loadPOI() {
+    try {
+      const data = await fetchJson("/api/pois/");
+
+      (data.pois || []).forEach(p => {
+        poiById.set(p.id, p);
+
+        const isVisited = visitedIds.has(Number(p.id));
+        const visitedLine = isVisited ? `<br><b style="color:#1b5e20">✓ Navštívené</b>` : "";
+
+        const popup = `
+          <b>${p.name}</b>${visitedLine}<br>
+          ${p.description}<br>
+          <i>${p.category}</i><br><br>
+          <button class="btn light" style="padding:8px 10px;border-radius:10px"
+            onclick="window.__navTo(${p.lat}, ${p.lng})">🧭 Navigovať sem</button>
+        `;
+
+        const marker = isVisited
+          ? L.marker([p.lat, p.lng], { icon: visitedIcon })
+          : L.marker([p.lat, p.lng]);
+
+        marker.addTo(map).bindPopup(popup);
+      });
+
+      readRouteFromUrl();
+    } catch (e) {
+      console.log("POI load fail:", e.message);
+    }
+  }
+
+  async function refreshActiveTrip() {
+    try {
+      const data = await fetchJson("/api/trip/active/");
+      if (data.trip) {
+        tripId = data.trip.id;
+        btnStart.disabled = true;
+        btnStop.disabled = false;
+        setLive(data.trip.distance_m || 0, data.trip.steps_est || 0);
+        startGps();
+      }
+    } catch (e) {
+      console.log("active trip fail:", e.message);
+    }
+  }
+
+  function startGps() {
+    if (!("geolocation" in navigator)) {
+      gpsStatus.textContent = "GPS: nepodporované v prehliadači";
+      msg.textContent = "Tento prehliadač nepodporuje geolokáciu.";
+      return;
+    }
+    if (watchId) return;
+
+    gpsStatus.textContent = "GPS: čakám na polohu…";
+
+    watchId = navigator.geolocation.watchPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      currentPos = { lat, lng };
+      gpsStatus.textContent = `GPS: OK (±${Math.round(pos.coords.accuracy)} m)`;
+
+      if (pendingRoute) {
+        showRouteTo(pendingRoute.lat, pendingRoute.lng);
+        msg.textContent = pendingRoute.name ? `Navigujem: ${pendingRoute.name}` : "";
+        pendingRoute = null;
+      }
+
+      const now = Date.now();
+      if (now - lastSentAt < 5000) return;
+      lastSentAt = now;
+
+      L.circleMarker([lat, lng], { radius: 5 }).addTo(map);
+
+      if (!tripId) return;
+
+      try {
+        const data = await fetchJson(`/api/trip/${tripId}/track/`, {
+          method: "POST",
+          headers: {
+            "Content-Type":"application/json",
+            "X-CSRFToken": csrfToken()
+          },
+          body: JSON.stringify({ lat, lng })
+        });
+
+        const distance_m = (data.distance_m ?? data.distance) ?? 0;
+        const steps_est  = (data.steps_est ?? data.steps) ?? 0;
+        setLive(distance_m, steps_est);
+
+      } catch (e) {
+        msg.textContent = "Track chyba: " + e.message;
+      }
+    }, (err) => {
+      gpsStatus.textContent = "GPS: chyba";
+      msg.textContent = "GPS chyba: " + err.message;
+    }, { enableHighAccuracy:true });
+  }
+
+  function stopGps() {
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+  }
+
+  btnStart.onclick = async () => {
+    msg.textContent = "";
+    try {
+      const data = await fetchJson("/api/trip/start/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken() }
+      });
+
+      tripId = data.id ?? data.trip?.id;
+      const distance_m = (data.distance_m ?? data.trip?.distance_m) ?? 0;
+      const steps_est  = (data.steps_est  ?? data.trip?.steps_est)  ?? 0;
+
+      btnStart.disabled = true;
+      btnStop.disabled = false;
+      setLive(distance_m, steps_est);
+      startGps();
+    } catch (e) {
+      msg.textContent = "Start chyba: " + e.message;
+    }
+  };
+
+  btnStop.onclick = async () => {
+    msg.textContent = "";
+    try {
+      await fetchJson("/api/trip/stop/", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken() }
+      });
+
+      tripId = null;
+      btnStart.disabled = false;
+      btnStop.disabled = true;
+      stopGps();
+      msg.textContent = "Výlet ukončený.";
+    } catch (e) {
+      msg.textContent = "Stop chyba: " + e.message;
+    }
+  };
+
+  // init: najprv visited, potom POI (aby vedel označiť markery)
+  (async () => {
+    await loadVisited();
+    await loadPOI();
+    await refreshActiveTrip();
+  })();
+</script>
+
+</body>
+</html>

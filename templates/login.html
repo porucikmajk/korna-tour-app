@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Korňa – Prihlásenie</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --green:#2e7d32;
+      --green2:#1b5e20;
+      --border:#e5e7eb;
+      --shadow: 0 14px 35px rgba(0,0,0,.10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(46,125,50,.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 20%, rgba(27,94,32,.16), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px 14px;
+    }
+    .wrap{
+      width:min(940px, 100%);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media(min-width:900px){
+      .wrap{grid-template-columns: 1.05fr .95fr; gap:18px;}
+    }
+
+    .hero{
+      background:linear-gradient(135deg, rgba(46,125,50,.95), rgba(27,94,32,.95));
+      color:#fff;
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      inset:-40px -80px auto auto;
+      width:280px;height:280px;
+      background:rgba(255,255,255,.12);
+      border-radius:999px;
+      transform: rotate(18deg);
+    }
+    .hero h1{
+      margin:0 0 10px 0;
+      font-size:22px;
+      line-height:1.15;
+      position:relative;
+      z-index:1;
+    }
+    .hero p{
+      margin:0;
+      opacity:.92;
+      font-size:13px;
+      line-height:1.5;
+      position:relative;
+      z-index:1;
+    }
+    .bullets{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+      position:relative;
+      z-index:1;
+    }
+    .bullet{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.20);
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:13px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .card h2{margin:0 0 8px 0;font-size:18px}
+    .muted{color:var(--muted);font-size:13px;margin:0 0 14px 0}
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin:10px 0;
+    }
+    label{font-size:12px;color:var(--muted)}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      outline:none;
+      font-size:14px;
+      background:#fff;
+    }
+    input:focus{
+      border-color: rgba(46,125,50,.55);
+      box-shadow: 0 0 0 4px rgba(46,125,50,.12);
+    }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .btn{
+      flex:1;
+      border:0;
+      border-radius:14px;
+      padding:12px 12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:14px;
+      transition: transform .05s ease;
+      user-select:none;
+      min-width: 160px;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{background:var(--green);color:#fff}
+    .btn.secondary{
+      background:#fff;
+      color:#0f172a;
+      border:1px solid var(--border);
+    }
+
+    .err{
+      margin-top:10px;
+      font-size:13px;
+      color:#b00020;
+      background: #fff0f1;
+      border:1px solid #ffd3d7;
+      padding:10px 12px;
+      border-radius:14px;
+      display:none;
+      white-space:pre-wrap;
+    }
+    .ok{
+      margin-top:10px;
+      font-size:13px;
+      color:#0b6b1b;
+      background:#effdf2;
+      border:1px solid #c8f3d2;
+      padding:10px 12px;
+      border-radius:14px;
+      display:none;
+      white-space:pre-wrap;
+    }
+    .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:12px;
+      line-height:1.45;
+    }
+    a{color:var(--green);text-decoration:none;font-weight:800}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Korňa – turistický sprievodca</h1>
+    <p>
+      Prihlás sa a aplikácia ti bude počítať prejdenú vzdialenosť, odhad krokov
+      a zaznamená navštívené miesta (POI) počas výletu.
+    </p>
+
+    <div class="bullets">
+      <div class="bullet">🗺️ Mapa s bodmi záujmu (POI) + navigácia</div>
+      <div class="bullet">🚶 Výlet (GPS) → vzdialenosť + kroky</div>
+      <div class="bullet">📍 Automatické „navštívené miesta“ v okolí</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Prihlásenie</h2>
+    <p class="muted">
+      Zadaj používateľské meno a heslo. Ak ešte nemáš účet, vytvor si ho – po registrácii ti príde email s aktivačným linkom.
+    </p>
+
+    <!-- CSRF pre Django -->
+    <input type="hidden" id="csrf" value="{{ csrf_token }}">
+
+    <div class="field">
+      <label for="username">Používateľské meno</label>
+      <input id="username" placeholder="napr. mike123" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label for="password">Heslo</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div class="row">
+      <button class="btn primary" onclick="login()">Prihlásiť sa</button>
+      <button class="btn secondary" onclick="location.href='/register/'">Vytvoriť účet</button>
+    </div>
+
+    <p class="muted" style="margin-top:12px">
+      Nemáš aktivovaný účet? Skontroluj email a klikni na aktivačný link.
+    </p>
+
+    <div class="err" id="err"></div>
+    <div class="ok" id="ok"></div>
+
+    <div class="small">
+      Tip: Ak sa neprihlási, skontroluj, či máš povolené cookies a JavaScript. Pri aktivácii účtu sa používa emailový link.
+    </div>
+  </div>
+</div>
+
+<script>
+  const err = document.getElementById("err");
+  const ok = document.getElementById("ok");
+  const username = document.getElementById("username");
+  const password = document.getElementById("password");
+
+  function csrfToken() {
+    return document.getElementById("csrf").value;
+  }
+
+  function showErr(t){
+    ok.style.display = "none";
+    err.style.display = "block";
+    err.textContent = t;
+  }
+  function showOk(t){
+    err.style.display = "none";
+    ok.style.display = "block";
+    ok.textContent = t;
+  }
+
+  async function login() {
+    err.style.display = "none";
+    ok.style.display = "none";
+
+    const r = await fetch("/api/login/", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type":"application/json",
+        "X-CSRFToken": csrfToken()
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value
+      })
+    });
+
+    const text = await r.text();
+    if (r.ok) {
+      showOk("Prihlásenie úspešné. Presmerúvam…");
+      setTimeout(() => location.href = "/dashboard/", 350);
+    } else {
+      showErr("Login zlyhal: " + text);
+    }
+  }
+
+  // Enter = login
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") login();
+  });
+</script>
+
+</body>
+</html>

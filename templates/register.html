@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Korňa – Registrácia</title>
+  <style>
+    * {
+    box-sizing: border-box;
+    }
+
+    body{
+    margin:0;
+    font-family:system-ui, Arial, sans-serif;
+    background:#f6f7fb;
+    display:flex;
+    min-height:100vh;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    }
+
+    .card{
+    width:min(520px,100%);
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 14px 35px rgba(0,0,0,.10);
+    }
+
+    h2{margin:0 0 8px 0}
+
+    .muted{
+    color:#6b7280;
+    font-size:13px;
+    margin:0 0 12px 0;
+    }
+
+    label{
+    font-size:12px;
+    color:#6b7280;
+    display:block;
+    margin-top:8px;
+    }
+
+    input{
+    width:100%;
+    padding:12px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    margin-top:6px;
+    font-size:14px;
+    }
+
+    input:focus{
+    outline:none;
+    border-color:#2e7d32;
+    box-shadow:0 0 0 3px rgba(46,125,50,.15);
+    }
+
+    button{
+    width:100%;
+    padding:12px;
+    border:0;
+    border-radius:14px;
+    background:#2e7d32;
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+    margin-top:14px;
+    }
+
+    .err{
+    margin-top:10px;
+    color:#b00020;
+    background:#fff0f1;
+    border:1px solid #ffd3d7;
+    padding:10px 12px;
+    border-radius:14px;
+    }
+
+    a{
+    color:#2e7d32;
+    text-decoration:none;
+    font-weight:700;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Registrácia</h2>
+    <p class="muted">Po registrácii ti príde email s aktivačným linkom.</p>
+
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+    <form method="POST" action="/register/submit/">
+      {% csrf_token %}
+
+      <label>Username</label>
+      <input name="username" placeholder="napr. mike123" required>
+
+      <label>Email</label>
+      <input name="email" type="email" placeholder="napr. mike@gmail.com" required>
+
+      <label>Heslo</label>
+      <input name="password" type="password" placeholder="min. 6 znakov" required>
+
+      <button type="submit">Vytvoriť účet</button>
+    </form>
+
+    <p class="muted" style="margin-top:12px">
+      Už máš účet? <a href="/">Prihlás sa</a>
+    </p>
+  </div>
+</body>
+</html>
