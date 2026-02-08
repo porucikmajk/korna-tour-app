@@ -28,7 +28,9 @@ SECRET_KEY = 'django-insecure-01mj(gny$3i0+z$+3bg(o_bb-m*85b6*-aex=subuqo80vsd@&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'korna-tour-app.onrender.com',
+]
 
 
 # Application definition
