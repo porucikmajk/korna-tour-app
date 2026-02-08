@@ -23,7 +23,4 @@ urlpatterns = [
     path("admin/poi/<int:poi_id>/update/", api_views.admin_poi_update),
     path("admin/poi/<int:poi_id>/delete/", api_views.admin_poi_delete),
     path("admin/user/<int:user_id>/delete/", api_views.admin_user_delete),
-
-    ## TEMP ##
-    path("bootstrap-admin/", api_views.bootstrap_admin),
 ]
