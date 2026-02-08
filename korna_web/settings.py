@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-01mj(gny$3i0+z$+3bg(o_bb-m*85b6*-aex=subuqo80vsd@&
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'korna-tour-app.onrender.com',
+    'korna-tour-app.onrender.com'
 ]
 
 
