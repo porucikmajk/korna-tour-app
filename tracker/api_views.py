@@ -30,8 +30,16 @@ from rest_framework.response import Response
 @permission_classes([AllowAny])
 def bootstrap_admin(request):
     key = request.query_params.get("key", "")
-    if key != os.environ.get("BOOTSTRAP_KEY", ""):
-        return Response({"error": "forbidden"}, status=403)
+    env_key = os.environ.get("BOOTSTRAP_KEY", "")
+    
+    if key != env_key:
+        return Response({
+            "error": "forbidden",
+            "got": key,
+            "got_len": len(key),
+            "env_set": bool(env_key),
+            "env_len": len(env_key),
+        }, status=403)
 
     username = os.environ.get("BOOTSTRAP_ADMIN_USER", "admin")
     email = os.environ.get("BOOTSTRAP_ADMIN_EMAIL", "")
