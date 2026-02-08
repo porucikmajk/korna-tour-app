@@ -19,48 +19,6 @@ from .serializers import POISerializer, TripSerializer
 STEP_LEN = 0.78
 VISIT_RADIUS = 30
 
-## TEMP ##
-import os
-from django.contrib.auth.models import User
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def bootstrap_admin(request):
-    key = request.query_params.get("key", "")
-    env_key = os.environ.get("BOOTSTRAP_KEY", "")
-    
-    if key != env_key:
-        return Response({
-            "error": "forbidden",
-            "got": key,
-            "got_len": len(key),
-            "env_set": bool(env_key),
-            "env_len": len(env_key),
-        }, status=403)
-
-    username = os.environ.get("BOOTSTRAP_ADMIN_USER", "admin")
-    email = os.environ.get("BOOTSTRAP_ADMIN_EMAIL", "")
-    password = os.environ.get("BOOTSTRAP_ADMIN_PASS", "admin12345")
-
-    u, created = User.objects.get_or_create(username=username, defaults={"email": email})
-    u.email = email or u.email
-    u.is_staff = True
-    u.is_superuser = True
-    u.is_active = True
-    u.set_password(password)   # nastavíme vždy
-    u.save()
-
-    return Response({"ok": True, "created": created, "username": username})
-
-
-
-
-
-
-
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371000
     p1 = math.radians(lat1)
